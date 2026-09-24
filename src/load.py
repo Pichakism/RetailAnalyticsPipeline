@@ -1,7 +1,20 @@
+
+import os
+
+import pandas as pd
 import psycopg2
 from psycopg2.extras import execute_values
 
 from src.config import DATABASE_URL
+
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+SCHEMA_PATH = os.path.join(
+    BASE_DIR,
+    "sql",
+    "01_create_schema.sql",
+)
 
 
 def get_connection():
@@ -19,7 +32,7 @@ def execute_schema():
         with connection:
             with connection.cursor() as cursor:
                 with open(
-                    "sql/01_create_schema.sql",
+                    SCHEMA_PATH,
                     "r",
                     encoding="utf-8",
                 ) as sql_file:
@@ -40,6 +53,22 @@ def execute_schema():
             connection.close()
 
 
+def normalize_dataframe(dataframe):
+    """
+    Convert Pandas missing values to Python None.
+
+    Python None is converted to SQL NULL by psycopg2.
+    This is necessary for nullable PostgreSQL columns.
+    """
+
+    normalized_dataframe = dataframe.astype(object).where(
+        pd.notna(dataframe),
+        None,
+    )
+
+    return normalized_dataframe
+
+
 def load_data(
     dim_customers,
     dim_categories,
@@ -53,10 +82,26 @@ def load_data(
 
     Dimensions are loaded before facts because fact tables
     contain foreign keys referencing dimension tables.
+
+    Category IDs are retrieved from PostgreSQL using category_name.
+    Pandas missing values are converted to SQL NULL.
     """
+
     connection = None
 
     try:
+        # ------------------------------------------------------------
+        # 0. Normalize missing values
+        # ------------------------------------------------------------
+        dim_customers = normalize_dataframe(dim_customers)
+        dim_categories = normalize_dataframe(dim_categories)
+        dim_products = normalize_dataframe(dim_products)
+        dim_branches = normalize_dataframe(dim_branches)
+        fact_sales = normalize_dataframe(fact_sales)
+        fact_inventory_snapshot = normalize_dataframe(
+            fact_inventory_snapshot
+        )
+
         connection = get_connection()
 
         with connection:
@@ -131,8 +176,46 @@ def load_data(
                     )
 
                 # ----------------------------------------------------
-                # 3. Products
+                # 3. Retrieve real category IDs from PostgreSQL
                 # ----------------------------------------------------
+                cursor.execute(
+                    """
+                    SELECT category_id, category_name
+                    FROM dim_categories;
+                    """
+                )
+
+                category_mapping = {
+                    category_name: category_id
+                    for category_id, category_name in cursor.fetchall()
+                }
+
+                # ----------------------------------------------------
+                # 4. Products
+                # ----------------------------------------------------
+                product_values = []
+
+                for _, row in dim_products.iterrows():
+                    category_name = row["category_name"]
+
+                    category_id = category_mapping.get(category_name)
+
+                    if category_id is None:
+                        raise ValueError(
+                            f"Category '{category_name}' was not found "
+                            "in dim_categories."
+                        )
+
+                    product_values.append(
+                        (
+                            row["product_id"],
+                            row["product_name"],
+                            category_id,
+                            row["unit_cost"],
+                            row["unit_price"],
+                        )
+                    )
+
                 product_query = """
                     INSERT INTO dim_products (
                         product_id,
@@ -150,17 +233,6 @@ def load_data(
                         unit_price = EXCLUDED.unit_price;
                 """
 
-                product_values = [
-                    (
-                        row["product_id"],
-                        row["product_name"],
-                        row["category_id"],
-                        row["unit_cost"],
-                        row["unit_price"],
-                    )
-                    for _, row in dim_products.iterrows()
-                ]
-
                 if product_values:
                     execute_values(
                         cursor,
@@ -169,7 +241,7 @@ def load_data(
                     )
 
                 # ----------------------------------------------------
-                # 4. Branches
+                # 5. Branches
                 # ----------------------------------------------------
                 branch_query = """
                     INSERT INTO dim_branches (
@@ -201,7 +273,7 @@ def load_data(
                     )
 
                 # ----------------------------------------------------
-                # 5. Sales
+                # 6. Sales
                 # ----------------------------------------------------
                 sales_query = """
                     INSERT INTO fact_sales (
@@ -251,7 +323,7 @@ def load_data(
                     )
 
                 # ----------------------------------------------------
-                # 6. Inventory Snapshot
+                # 7. Inventory Snapshot
                 # ----------------------------------------------------
                 inventory_query = """
                     INSERT INTO fact_inventory_snapshot (
