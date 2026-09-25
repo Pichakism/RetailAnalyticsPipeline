@@ -88,7 +88,7 @@ Validation and Reporting SQL Scripts
 The main Python pipeline is executed through:
 
 ```bash
-python -m src.main
+python -m main
 ```
 
 This command runs the main pipeline stages sequentially.
@@ -483,8 +483,8 @@ RetailAnalyticsPipeline/
 |   |-- transform.py
 |   |-- quality.py
 |   |-- load.py
-|   |-- main.py
 |
+|-- main.py
 |-- .env
 |-- .gitignore
 |-- docker-compose.yml
@@ -562,7 +562,7 @@ pip install -r requirements.txt
 Run the following command from the project root directory:
 
 ```bash
-python -m src.main
+python -m main
 ```
 
 The main file executes the pipeline stages in the following order:
@@ -770,7 +770,7 @@ These features can be considered as future extensions.
 The complete Python pipeline can be executed using one command:
 
 ```bash
-python -m src.main
+python -m main
 ```
 
 The pipeline performs the following operations:
@@ -785,4 +785,3 @@ The pipeline performs the following operations:
 ```
 
 After the main pipeline has completed successfully, the SQL scripts can be used for database validation, business analysis, reporting view creation, and reporting view validation.
-```
