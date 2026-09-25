@@ -5,9 +5,7 @@
 -- ============================================================
 
 
--- ============================================================
 -- 1. Row Counts
--- ============================================================
 
 SELECT
     'dim_customers' AS table_name,
@@ -50,9 +48,7 @@ SELECT
 FROM fact_inventory_snapshot;
 
 
--- ============================================================
 -- 2. Duplicate Primary Keys
--- ============================================================
 
 SELECT
     'dim_customers' AS table_name,
@@ -93,9 +89,7 @@ GROUP BY sale_id
 HAVING COUNT(*) > 1;
 
 
--- ============================================================
 -- 3. Foreign Key Validation: Products → Categories
--- ============================================================
 
 SELECT
     COUNT(*) AS invalid_product_category_references
@@ -105,9 +99,7 @@ LEFT JOIN dim_categories c
 WHERE c.category_id IS NULL;
 
 
--- ============================================================
 -- 4. Foreign Key Validation: Sales → Customers
--- ============================================================
 
 SELECT
     COUNT(*) AS invalid_sales_customer_references
@@ -117,9 +109,7 @@ LEFT JOIN dim_customers c
 WHERE c.customer_id IS NULL;
 
 
--- ============================================================
 -- 5. Foreign Key Validation: Sales → Products
--- ============================================================
 
 SELECT
     COUNT(*) AS invalid_sales_product_references
@@ -129,9 +119,7 @@ LEFT JOIN dim_products p
 WHERE p.product_id IS NULL;
 
 
--- ============================================================
 -- 6. Foreign Key Validation: Sales → Branches
--- ============================================================
 
 SELECT
     COUNT(*) AS invalid_sales_branch_references
@@ -141,9 +129,7 @@ LEFT JOIN dim_branches b
 WHERE b.branch_id IS NULL;
 
 
--- ============================================================
 -- 7. Foreign Key Validation: Inventory → Products
--- ============================================================
 
 SELECT
     COUNT(*) AS invalid_inventory_product_references
@@ -153,9 +139,7 @@ LEFT JOIN dim_products p
 WHERE p.product_id IS NULL;
 
 
--- ============================================================
 -- 8. Foreign Key Validation: Inventory → Branches
--- ============================================================
 
 SELECT
     COUNT(*) AS invalid_inventory_branch_references
@@ -165,9 +149,7 @@ LEFT JOIN dim_branches b
 WHERE b.branch_id IS NULL;
 
 
--- ============================================================
 -- 9. Required Column NULL Checks
--- ============================================================
 
 SELECT
     'dim_customers.customer_id' AS column_name,
@@ -224,9 +206,7 @@ FROM fact_sales
 WHERE quantity IS NULL;
 
 
--- ============================================================
 -- 10. Business Rule Validation
--- ============================================================
 
 SELECT
     COUNT(*) AS invalid_sales_quantity
@@ -265,9 +245,7 @@ FROM fact_inventory_snapshot
 WHERE reorder_level < 0;
 
 
--- ============================================================
 -- 11. Duplicate Inventory Composite Keys
--- ============================================================
 
 SELECT
     product_id,

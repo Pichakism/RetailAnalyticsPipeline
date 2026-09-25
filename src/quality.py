@@ -127,10 +127,7 @@ def run_quality_checks(
 
     valid_tables = {}
 
-    # =========================================================
     # 1. Validate Customers
-    # =========================================================
-
     customer_required_columns = [
         "customer_id",
         "first_name",
@@ -162,10 +159,7 @@ def run_quality_checks(
         "rejected_customers.csv",
     )
 
-    # =========================================================
     # 2. Validate Categories
-    # =========================================================
-
     category_required_columns = [
         "category_name",
     ]
@@ -195,10 +189,7 @@ def run_quality_checks(
         "rejected_categories.csv",
     )
 
-    # =========================================================
     # 3. Validate Products
-    # =========================================================
-
     product_required_columns = [
         "product_id",
         "product_name",
@@ -240,10 +231,7 @@ def run_quality_checks(
         "rejected_products.csv",
     )
 
-    # =========================================================
     # 4. Validate Branches
-    # =========================================================
-
     branch_required_columns = [
         "branch_id",
         "branch_name",
@@ -274,10 +262,7 @@ def run_quality_checks(
         "rejected_branches.csv",
     )
 
-    # =========================================================
     # 5. Validate Sales
-    # =========================================================
-
     sales_required_columns = [
         "sale_id",
         "sale_date",
@@ -348,10 +333,7 @@ def run_quality_checks(
         "rejected_sales.csv",
     )
 
-    # =========================================================
     # 6. Validate Inventory Snapshots
-    # =========================================================
-
     inventory_required_columns = [
         "product_id",
         "branch_id",
@@ -418,10 +400,7 @@ def run_quality_checks(
         "rejected_inventory.csv",
     )
 
-    # =========================================================
     # 7. Print Summary
-    # =========================================================
-
     print(
         "Data quality checks completed successfully."
     )

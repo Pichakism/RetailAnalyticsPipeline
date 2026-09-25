@@ -3,9 +3,7 @@
 -- Database Schema
 -- ============================================================
 
--- ============================================================
 -- 1. Dimension: Customers
--- ============================================================
 
 CREATE TABLE IF NOT EXISTS dim_customers (
     customer_id VARCHAR(20) PRIMARY KEY,
@@ -18,9 +16,7 @@ CREATE TABLE IF NOT EXISTS dim_customers (
 );
 
 
--- ============================================================
 -- 2. Dimension: Categories
--- ============================================================
 
 CREATE TABLE IF NOT EXISTS dim_categories (
     category_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -28,9 +24,7 @@ CREATE TABLE IF NOT EXISTS dim_categories (
 );
 
 
--- ============================================================
 -- 3. Dimension: Products
--- ============================================================
 
 CREATE TABLE IF NOT EXISTS dim_products (
     product_id VARCHAR(20) PRIMARY KEY,
@@ -53,9 +47,7 @@ CREATE TABLE IF NOT EXISTS dim_products (
 );
 
 
--- ============================================================
 -- 4. Dimension: Branches
--- ============================================================
 
 CREATE TABLE IF NOT EXISTS dim_branches (
     branch_id VARCHAR(20) PRIMARY KEY,
@@ -64,9 +56,7 @@ CREATE TABLE IF NOT EXISTS dim_branches (
 );
 
 
--- ============================================================
 -- 5. Fact: Sales
--- ============================================================
 
 CREATE TABLE IF NOT EXISTS fact_sales (
     sale_id VARCHAR(30) PRIMARY KEY,
@@ -105,9 +95,7 @@ CREATE TABLE IF NOT EXISTS fact_sales (
 );
 
 
--- ============================================================
 -- 6. Fact: Inventory Snapshot
--- ============================================================
 
 CREATE TABLE IF NOT EXISTS fact_inventory_snapshot (
     product_id VARCHAR(20) NOT NULL,

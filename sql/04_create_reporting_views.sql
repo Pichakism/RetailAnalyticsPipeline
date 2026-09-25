@@ -22,9 +22,7 @@
 -- ============================================================
 
 
--- ============================================================
 -- 1. Monthly Sales Reporting View
--- ============================================================
 
 CREATE VIEW reporting_monthly_sales AS
 SELECT
@@ -49,9 +47,7 @@ GROUP BY DATE_TRUNC('month', fs.sale_date)
 ORDER BY sales_month;
 
 
--- ============================================================
 -- 2. Product Performance Reporting View
--- ============================================================
 
 CREATE VIEW reporting_product_performance AS
 SELECT
@@ -82,9 +78,7 @@ GROUP BY
     dc.category_name;
 
 
--- ============================================================
 -- 3. Branch Performance Reporting View
--- ============================================================
 
 CREATE VIEW reporting_branch_performance AS
 SELECT
@@ -115,9 +109,7 @@ GROUP BY
     db.city;
 
 
--- ============================================================
 -- 4. Sales Channel Performance Reporting View
--- ============================================================
 
 CREATE VIEW reporting_sales_channel_performance AS
 SELECT
@@ -141,9 +133,7 @@ JOIN dim_products dp
 GROUP BY fs.sales_channel;
 
 
--- ============================================================
 -- 5. Category Performance Reporting View
--- ============================================================
 
 CREATE VIEW reporting_category_performance AS
 SELECT
@@ -172,9 +162,7 @@ GROUP BY
     dc.category_name;
 
 
--- ============================================================
 -- 6. Latest Inventory Reporting View
--- ============================================================
 
 CREATE VIEW reporting_latest_inventory AS
 WITH latest_inventory AS (
@@ -211,9 +199,7 @@ JOIN dim_branches db
 WHERE li.row_number = 1;
 
 
--- ============================================================
 -- 7. Sales KPI Reporting View
--- ============================================================
 
 CREATE VIEW reporting_sales_kpis AS
 SELECT

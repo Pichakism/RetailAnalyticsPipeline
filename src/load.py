@@ -90,9 +90,7 @@ def load_data(
     connection = None
 
     try:
-        # ------------------------------------------------------------
         # 0. Normalize missing values
-        # ------------------------------------------------------------
         dim_customers = normalize_dataframe(dim_customers)
         dim_categories = normalize_dataframe(dim_categories)
         dim_products = normalize_dataframe(dim_products)
@@ -107,9 +105,7 @@ def load_data(
         with connection:
             with connection.cursor() as cursor:
 
-                # ----------------------------------------------------
                 # 1. Customers
-                # ----------------------------------------------------
                 customer_query = """
                     INSERT INTO dim_customers (
                         customer_id,
@@ -151,9 +147,7 @@ def load_data(
                         customer_values,
                     )
 
-                # ----------------------------------------------------
                 # 2. Categories
-                # ----------------------------------------------------
                 category_query = """
                     INSERT INTO dim_categories (
                         category_name
@@ -175,9 +169,7 @@ def load_data(
                         category_values,
                     )
 
-                # ----------------------------------------------------
                 # 3. Retrieve real category IDs from PostgreSQL
-                # ----------------------------------------------------
                 cursor.execute(
                     """
                     SELECT category_id, category_name
@@ -190,9 +182,7 @@ def load_data(
                     for category_id, category_name in cursor.fetchall()
                 }
 
-                # ----------------------------------------------------
                 # 4. Products
-                # ----------------------------------------------------
                 product_values = []
 
                 for _, row in dim_products.iterrows():
@@ -240,9 +230,7 @@ def load_data(
                         product_values,
                     )
 
-                # ----------------------------------------------------
                 # 5. Branches
-                # ----------------------------------------------------
                 branch_query = """
                     INSERT INTO dim_branches (
                         branch_id,
@@ -272,9 +260,7 @@ def load_data(
                         branch_values,
                     )
 
-                # ----------------------------------------------------
                 # 6. Sales
-                # ----------------------------------------------------
                 sales_query = """
                     INSERT INTO fact_sales (
                         sale_id,
@@ -322,9 +308,7 @@ def load_data(
                         sales_values,
                     )
 
-                # ----------------------------------------------------
                 # 7. Inventory Snapshot
-                # ----------------------------------------------------
                 inventory_query = """
                     INSERT INTO fact_inventory_snapshot (
                         product_id,

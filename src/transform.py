@@ -276,18 +276,12 @@ def transform_and_normalize(
 
     df = df.copy()
 
-    # ---------------------------------------------------------
     # 1. Remove exact duplicate rows
-    # ---------------------------------------------------------
-
     df = df.drop_duplicates(
         keep="first",
     ).reset_index(drop=True)
 
-    # ---------------------------------------------------------
     # 2. Standardize text columns
-    # ---------------------------------------------------------
-
     title_columns = [
         "customer_city",
         "branch_city",
@@ -343,10 +337,7 @@ def transform_and_normalize(
             case="original",
         )
 
-    # ---------------------------------------------------------
     # 3. Convert date columns
-    # ---------------------------------------------------------
-
     date_columns = [
         "sale_date",
         "customer_signup_date",
@@ -358,10 +349,7 @@ def transform_and_normalize(
         date_columns,
     )
 
-    # ---------------------------------------------------------
     # 4. Convert numeric columns
-    # ---------------------------------------------------------
-
     numeric_columns = [
         "unit_cost",
         "unit_price",
@@ -376,18 +364,12 @@ def transform_and_normalize(
         numeric_columns,
     )
 
-    # ---------------------------------------------------------
     # 5. Create category mapping
-    # ---------------------------------------------------------
-
     df, dim_categories = _create_category_mapping(
         df,
     )
 
-    # ---------------------------------------------------------
     # 6. Create dimension tables
-    # ---------------------------------------------------------
-
     dim_customers = _create_customer_dimension(
         df,
     )
@@ -404,10 +386,7 @@ def transform_and_normalize(
         df,
     )
 
-    # ---------------------------------------------------------
     # 7. Create fact tables
-    # ---------------------------------------------------------
-
     fact_sales = _create_sales_fact(
         df,
     )
@@ -416,10 +395,7 @@ def transform_and_normalize(
         df,
     )
 
-    # ---------------------------------------------------------
     # 8. Return all normalized tables
-    # ---------------------------------------------------------
-
     return {
         "dim_customers": dim_customers,
         "dim_categories": dim_categories,
