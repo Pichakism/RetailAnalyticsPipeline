@@ -463,6 +463,7 @@ RetailAnalyticsPipeline/
 |
 |-- data/
 |   |-- raw/
+|       |-- retail_transactions_denormalized.csv
 |   |-- processed/
 |       |-- rejected_records/
 |
@@ -484,11 +485,12 @@ RetailAnalyticsPipeline/
 |   |-- quality.py
 |   |-- load.py
 |
-|-- main.py
 |-- .env
 |-- .gitignore
 |-- docker-compose.yml
+|-- main.py
 |-- README.md
+|-- requirements.txt
 ```
 
 The raw input file should be placed in the expected location configured in:
