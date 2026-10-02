@@ -13,7 +13,7 @@ from src.extract import extract_data
 from src.transform import transform_and_normalize
 from src.quality import run_quality_checks
 from src.load import execute_schema, load_data
-
+from src.reports import generate_charts
 
 def print_stage_header(stage_number, stage_name):
     """Print a clear header for each pipeline stage."""
@@ -93,6 +93,12 @@ def main():
                 "fact_inventory_snapshot"
             ],
         )
+        
+        # Stage 6: Reporting & Visualization
+        print("\n" + "="*70)
+        print("STAGE 6: REPORTING & VISUALIZATION")
+        print("="*70)
+        generate_charts()
 
         print("All data was loaded into PostgreSQL successfully.")
 
