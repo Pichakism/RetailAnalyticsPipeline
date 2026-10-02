@@ -11,7 +11,7 @@ VIEWS_SQL_PATH = os.path.join(BASE_DIR, "sql", "04_create_reporting_views.sql")
 
 def create_reporting_views():
     """Execute the SQL file to create reporting views in the database."""
-    print("Checking/Creating reporting views in the database...")
+    print("Checking reporting views...")
     try:
         with psycopg2.connect(DATABASE_URL) as conn:
             with conn.cursor() as cursor:
@@ -19,7 +19,7 @@ def create_reporting_views():
                     cursor.execute(file.read())
     except Exception as e:
         if "already exists" in str(e):
-            print("Views already exist. Skipping creation...")
+            pass # Ignore smoothly if views are already built
         else:
             raise e
 
@@ -30,22 +30,13 @@ def get_dataframe_from_view(query: str) -> pd.DataFrame:
             cursor.execute(query)
             columns = [desc[0] for desc in cursor.description]
             data = cursor.fetchall()
-            df = pd.DataFrame(data, columns=columns)
-            
-            # Convert PostgreSQL NUMERIC (Decimal) to Python float for Matplotlib
-            for col in df.columns:
-                if df[col].dtype == 'object':
-                    try:
-                        df[col] = df[col].astype(float)
-                    except (ValueError, TypeError):
-                        pass
-            return df
+            return pd.DataFrame(data, columns=columns)
 
 def generate_charts():
     """Generate and save business reports using matplotlib."""
     os.makedirs(CHARTS_DIR, exist_ok=True)
     
-    # 0. First, create the views in PostgreSQL!
+    # 0. Ensure views exist
     create_reporting_views()
     
     print("Generating business charts...")
@@ -53,8 +44,9 @@ def generate_charts():
     # 1. Monthly Sales Trend (Line Chart)
     df_monthly = get_dataframe_from_view("SELECT sales_month, net_revenue FROM reporting_monthly_sales ORDER BY sales_month;")
     if not df_monthly.empty:
+        df_monthly['net_revenue'] = pd.to_numeric(df_monthly['net_revenue'], errors='coerce').fillna(0)
         plt.figure(figsize=(10, 5))
-        plt.plot(df_monthly['sales_month'], df_monthly['net_revenue'], marker='o', linestyle='-', color='#1f77b4')
+        plt.plot(df_monthly['sales_month'].astype(str), df_monthly['net_revenue'], marker='o', linestyle='-', color='#1f77b4')
         plt.title('Monthly Net Revenue Trend')
         plt.xlabel('Month')
         plt.ylabel('Net Revenue ($)')
@@ -67,6 +59,7 @@ def generate_charts():
     # 2. Top 10 Products by Net Revenue (Bar Chart)
     df_products = get_dataframe_from_view("SELECT product_name, net_revenue FROM reporting_product_performance ORDER BY net_revenue DESC LIMIT 10;")
     if not df_products.empty:
+        df_products['net_revenue'] = pd.to_numeric(df_products['net_revenue'], errors='coerce').fillna(0)
         plt.figure(figsize=(10, 6))
         plt.barh(df_products['product_name'][::-1], df_products['net_revenue'][::-1], color='#2ca02c')
         plt.title('Top 10 Products by Net Revenue')
@@ -78,6 +71,7 @@ def generate_charts():
     # 3. Branch Performance (Bar Chart)
     df_branch = get_dataframe_from_view("SELECT branch_name, net_revenue FROM reporting_branch_performance ORDER BY net_revenue DESC;")
     if not df_branch.empty:
+        df_branch['net_revenue'] = pd.to_numeric(df_branch['net_revenue'], errors='coerce').fillna(0)
         plt.figure(figsize=(8, 5))
         plt.bar(df_branch['branch_name'], df_branch['net_revenue'], color='#ff7f0e')
         plt.title('Net Revenue by Branch')
@@ -90,16 +84,23 @@ def generate_charts():
     # 4. Sales Channel Distribution (Pie Chart)
     df_channel = get_dataframe_from_view("SELECT sales_channel, net_revenue FROM reporting_sales_channel_performance;")
     if not df_channel.empty:
-        plt.figure(figsize=(7, 7))
-        plt.pie(df_channel['net_revenue'], labels=df_channel['sales_channel'], autopct='%1.1f%%', startangle=140, colors=['#9467bd', '#8c564b', '#e377c2'])
-        plt.title('Revenue Distribution by Sales Channel')
-        plt.tight_layout()
-        plt.savefig(os.path.join(CHARTS_DIR, '04_sales_channel_distribution.png'))
-        plt.close()
+        # Strictly clean data for Pie Chart to prevent crashes
+        df_channel['net_revenue'] = pd.to_numeric(df_channel['net_revenue'], errors='coerce').fillna(0)
+        df_channel = df_channel[df_channel['net_revenue'] > 0] 
+        df_channel['sales_channel'] = df_channel['sales_channel'].fillna('Unknown')
+        
+        if not df_channel.empty:
+            plt.figure(figsize=(7, 7))
+            plt.pie(df_channel['net_revenue'], labels=df_channel['sales_channel'], autopct='%1.1f%%', startangle=140)
+            plt.title('Revenue Distribution by Sales Channel')
+            plt.tight_layout()
+            plt.savefig(os.path.join(CHARTS_DIR, '04_sales_channel_distribution.png'))
+            plt.close()
 
     # 5. Category Performance (Bar Chart)
     df_category = get_dataframe_from_view("SELECT category_name, net_revenue FROM reporting_category_performance ORDER BY net_revenue DESC;")
     if not df_category.empty:
+        df_category['net_revenue'] = pd.to_numeric(df_category['net_revenue'], errors='coerce').fillna(0)
         plt.figure(figsize=(10, 5))
         plt.bar(df_category['category_name'], df_category['net_revenue'], color='#d62728')
         plt.title('Net Revenue by Category')
