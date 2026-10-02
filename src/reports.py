@@ -11,11 +11,17 @@ VIEWS_SQL_PATH = os.path.join(BASE_DIR, "sql", "04_create_reporting_views.sql")
 
 def create_reporting_views():
     """Execute the SQL file to create reporting views in the database."""
-    print("Creating reporting views in the database...")
-    with psycopg2.connect(DATABASE_URL) as conn:
-        with conn.cursor() as cursor:
-            with open(VIEWS_SQL_PATH, "r", encoding="utf-8") as file:
-                cursor.execute(file.read())
+    print("Checking/Creating reporting views in the database...")
+    try:
+        with psycopg2.connect(DATABASE_URL) as conn:
+            with conn.cursor() as cursor:
+                with open(VIEWS_SQL_PATH, "r", encoding="utf-8") as file:
+                    cursor.execute(file.read())
+    except Exception as e:
+        if "already exists" in str(e):
+            print("Views already exist. Skipping creation...")
+        else:
+            raise e
 
 def get_dataframe_from_view(query: str) -> pd.DataFrame:
     """Fetch data from PostgreSQL and return as Pandas DataFrame."""
