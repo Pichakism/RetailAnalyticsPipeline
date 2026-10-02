@@ -1,3 +1,15 @@
+plt.title('Net Revenue by Category')
+        plt.ylabel('Net Revenue ($)')
+        plt.xticks(rotation=45)
+        plt.tight_layout()
+        plt.savefig(os.path.join(CHARTS_DIR, '05_category_performance.png'))
+        plt.close()
+
+    print(f"5 charts successfully generated and saved in: {CHARTS_DIR}")
+
+if __name__ == "__main__":
+    generate_charts()
+
 import os
 import psycopg2
 import pandas as pd
@@ -7,6 +19,15 @@ from src.config import DATABASE_URL
 # Define paths
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CHARTS_DIR = os.path.join(BASE_DIR, "reports", "charts")
+VIEWS_SQL_PATH = os.path.join(BASE_DIR, "sql", "04_create_reporting_views.sql")
+
+def create_reporting_views():
+    """Execute the SQL file to create reporting views in the database."""
+    print("Creating reporting views in the database...")
+    with psycopg2.connect(DATABASE_URL) as conn:
+        with conn.cursor() as cursor:
+            with open(VIEWS_SQL_PATH, "r", encoding="utf-8") as file:
+                cursor.execute(file.read())
 
 def get_dataframe_from_view(query: str) -> pd.DataFrame:
     """Fetch data from PostgreSQL and return as Pandas DataFrame."""
@@ -20,7 +41,11 @@ def get_dataframe_from_view(query: str) -> pd.DataFrame:
 def generate_charts():
     """Generate and save business reports using matplotlib."""
     os.makedirs(CHARTS_DIR, exist_ok=True)
-    print("\nGenerating business charts...")
+    
+    # 0. First, create the views in PostgreSQL!
+    create_reporting_views()
+    
+    print("Generating business charts...")
 
     # 1. Monthly Sales Trend (Line Chart)
     df_monthly = get_dataframe_from_view("SELECT sales_month, net_revenue FROM reporting_monthly_sales ORDER BY sales_month;")
@@ -74,14 +99,3 @@ def generate_charts():
     if not df_category.empty:
         plt.figure(figsize=(10, 5))
         plt.bar(df_category['category_name'], df_category['net_revenue'], color='#d62728')
-        plt.title('Net Revenue by Category')
-        plt.ylabel('Net Revenue ($)')
-        plt.xticks(rotation=45)
-        plt.tight_layout()
-        plt.savefig(os.path.join(CHARTS_DIR, '05_category_performance.png'))
-        plt.close()
-
-    print(f"5 charts successfully generated and saved in: {CHARTS_DIR}")
-
-if __name__ == "__main__":
-    generate_charts()
