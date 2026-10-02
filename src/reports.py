@@ -24,7 +24,16 @@ def get_dataframe_from_view(query: str) -> pd.DataFrame:
             cursor.execute(query)
             columns = [desc[0] for desc in cursor.description]
             data = cursor.fetchall()
-            return pd.DataFrame(data, columns=columns)
+            df = pd.DataFrame(data, columns=columns)
+            
+            # Convert PostgreSQL NUMERIC (Decimal) to Python float for Matplotlib
+            for col in df.columns:
+                if df[col].dtype == 'object':
+                    try:
+                        df[col] = df[col].astype(float)
+                    except (ValueError, TypeError):
+                        pass
+            return df
 
 def generate_charts():
     """Generate and save business reports using matplotlib."""
