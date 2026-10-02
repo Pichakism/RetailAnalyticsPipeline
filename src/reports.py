@@ -1,15 +1,3 @@
-plt.title('Net Revenue by Category')
-        plt.ylabel('Net Revenue ($)')
-        plt.xticks(rotation=45)
-        plt.tight_layout()
-        plt.savefig(os.path.join(CHARTS_DIR, '05_category_performance.png'))
-        plt.close()
-
-    print(f"5 charts successfully generated and saved in: {CHARTS_DIR}")
-
-if __name__ == "__main__":
-    generate_charts()
-
 import os
 import psycopg2
 import pandas as pd
@@ -99,3 +87,14 @@ def generate_charts():
     if not df_category.empty:
         plt.figure(figsize=(10, 5))
         plt.bar(df_category['category_name'], df_category['net_revenue'], color='#d62728')
+        plt.title('Net Revenue by Category')
+        plt.ylabel('Net Revenue ($)')
+        plt.xticks(rotation=45)
+        plt.tight_layout()
+        plt.savefig(os.path.join(CHARTS_DIR, '05_category_performance.png'))
+        plt.close()
+
+    print(f"5 charts successfully generated and saved in: {CHARTS_DIR}")
+
+if __name__ == "__main__":
+    generate_charts()
